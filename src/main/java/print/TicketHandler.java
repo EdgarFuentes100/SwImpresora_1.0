@@ -13,8 +13,7 @@ public class TicketHandler {
         this.mapper = new ObjectMapper();
     }
 
-    // Método principal con opción de ver o imprimir
-    public void handleMessage(String message, boolean soloVer) {
+    public void handleMessage(String message, boolean modoPrueba) {
         try {
             Map<String, Object> data = mapper.readValue(message, Map.class);
 
@@ -28,15 +27,14 @@ public class TicketHandler {
                     "Grupo: " + grupo + "\n" +
                     "-------------------\n";
 
-            printerService.imprimirTicket(grupo, contenido, soloVer);
+            printerService.imprimirTicket(grupo, contenido, modoPrueba);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // Sobrecarga para compatibilidad con llamadas antiguas
     public void handleMessage(String message) {
-        handleMessage(message, false); // Por defecto imprime directo
+        handleMessage(message, false);
     }
 }

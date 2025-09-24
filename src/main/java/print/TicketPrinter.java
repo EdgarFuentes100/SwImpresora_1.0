@@ -3,62 +3,64 @@ package print;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.awt.Desktop;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class TicketPrinter {
 
-    private final String printerName; // Opcional, null = impresora predeterminada
+    private final String printerName;
+    private final boolean modoPrueba;
 
-    public TicketPrinter() {
-        this.printerName = null;
-    }
-
-    public TicketPrinter(String printerName) {
+    public TicketPrinter(String printerName, boolean modoPrueba) {
         this.printerName = printerName;
+        this.modoPrueba = modoPrueba;
     }
 
-    // Imprimir directamente en la impresora
     public void printTicket(String contenido) {
         try {
-            File tempFile = File.createTempFile("ticket_", ".txt");
-            try (FileWriter writer = new FileWriter(tempFile)) {
+            File backupFile = new File("tickets_backup");
+            if (!backupFile.exists()) backupFile.mkdirs();
+
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            File file = new File(backupFile, "ticket_" + timestamp + ".txt");
+            try (FileWriter writer = new FileWriter(file)) {
                 writer.write(contenido);
             }
 
-            String command;
-            if (printerName == null || printerName.isEmpty()) {
-                command = "notepad /p \"" + tempFile.getAbsolutePath() + "\"";
+            if (modoPrueba || printerName == null || printerName.isEmpty()) {
+                abrirTicketEditable(file);
             } else {
-                command = "cmd /c print /D:\"" + printerName + "\" \"" + tempFile.getAbsolutePath() + "\"";
+                imprimirDirecto(file);
             }
-
-            ProcessBuilder pb = new ProcessBuilder(command.split(" "));
-            pb.start();
-
-            tempFile.deleteOnExit();
-            System.out.println("Ticket enviado a impresión: " + tempFile.getAbsolutePath());
-
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    // Abrir Notepad para ver el ticket
-    public void abrirTicket(String contenido) {
-        try {
-            File tempFile = File.createTempFile("ticket_", ".txt");
-            try (FileWriter writer = new FileWriter(tempFile)) {
-                writer.write(contenido);
-            }
-
-            // Usando ProcessBuilder para abrir Notepad confiablemente
-            ProcessBuilder pb = new ProcessBuilder("notepad.exe", tempFile.getAbsolutePath());
-            pb.start();
-
-            tempFile.deleteOnExit();
-            System.out.println("Ticket abierto en Notepad: " + tempFile.getAbsolutePath());
-
-        } catch (IOException e) {
-            e.printStackTrace();
+    private void abrirTicketEditable(File file) throws IOException {
+        if (Desktop.isDesktopSupported()) {
+            Desktop.getDesktop().edit(file);
         }
     }
+
+    private void imprimirDirecto(File file) throws IOException, InterruptedException {
+        // Supongamos que 'file' es el archivo PDF que deseas imprimir.
+        // Asegúrate de que 'printerName' es el nombre correcto de la impresora.
+
+        String printerCommand;
+
+        if (printerName == null || printerName.isEmpty()) {
+            // Si no se especifica la impresora, se usa la impresora predeterminada
+            printerCommand = "cmd /c print /D:\"Microsoft Print to PDF\" \"" + file.getAbsolutePath() + "\"";
+        } else {
+            // Si tienes una impresora específica, usa su nombre.
+            printerCommand = "cmd /c print /D:\"" + printerName + "\" \"" + file.getAbsolutePath() + "\"";
+        }
+
+        // Ejecutar el comando para imprimir
+        Process process = Runtime.getRuntime().exec(printerCommand);
+        process.waitFor();  // Esperar a que se termine el proceso de impresión
+    }
+
 }

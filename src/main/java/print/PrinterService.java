@@ -9,7 +9,6 @@ public class PrinterService {
 
     public PrinterService() {
         grupoImpresora = new HashMap<>();
-        // Inicializa los grupos con impresora por defecto
         grupoImpresora.put("Cocina", "Impresora1");
         grupoImpresora.put("Bar", "Impresora2");
     }
@@ -22,14 +21,9 @@ public class PrinterService {
         return grupoImpresora.get(grupo);
     }
 
-    // Método centralizado de impresión
-    public void imprimirTicket(String grupo, String contenido, boolean soloVer) {
+    public void imprimirTicket(String grupo, String contenido, boolean modoPrueba) {
         String impresora = getPrinterForGroup(grupo);
-        TicketPrinter printer = new TicketPrinter(impresora);
-        if (soloVer) {
-            printer.abrirTicket(contenido); // abrir Notepad para ver
-        } else {
-            printer.printTicket(contenido); // imprimir directamente
-        }
+        TicketPrinter printer = new TicketPrinter(impresora, modoPrueba);
+        printer.printTicket(contenido);
     }
 }
