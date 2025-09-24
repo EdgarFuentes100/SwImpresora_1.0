@@ -2,6 +2,7 @@ package print;
 
 import auth.JWTService;
 import ws.WSClient;
+import api.ApiClient;  // Importa ApiClient
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,30 +12,26 @@ public class PrintServiceInit {
 
     private WSClient wsClient;
     private TicketHandler ticketHandler;
-    private boolean modoPrueba;
-    private final String logPath = "C:\\Users\\Fuentes\\Desktop\\INsta\\service.log"; // Ruta de log
-
-    public PrintServiceInit(boolean modoPrueba) {
-        this.modoPrueba = modoPrueba;
-    }
+    private final String logPath = "C:\\Users\\Fuentes\\Desktop\\INsta\\service.log";
 
     public void start() {
         log("Iniciando servicio de impresión...");
 
         try {
+            // Instanciar los servicios necesarios
             PrinterService printerService = new PrinterService();
-            ticketHandler = new TicketHandler(printerService);
+            ApiClient apiClient = new ApiClient();  // Crear la instancia de ApiClient
+            ticketHandler = new TicketHandler(printerService, apiClient);  // Pasar ambos servicios al constructor de TicketHandler
 
             JWTService jwtService = new JWTService("MI_SECRETO_DE_EXE_QUE_ES_LO_SUFICIENTE_32_BYTES");
             wsClient = new WSClient("ws://localhost:8080/", jwtService, ticketHandler);
 
-            // Configurar recepción de mensajes
             wsClient.setOnMessage(msg -> {
                 log("Mensaje recibido: " + msg);
-                ticketHandler.handleMessage(msg, modoPrueba);
+                ticketHandler.handleMessage(msg);  // Llamada a handleMessage
             });
 
-            // Reconexión automática
+            // Hilo para intentar reconectar si la conexión se cae
             new Thread(() -> {
                 while (true) {
                     try {
@@ -49,7 +46,7 @@ public class PrintServiceInit {
                 }
             }, "ReconexionThread").start();
 
-            log("Servicio corriendo. Modo prueba: " + modoPrueba);
+            log("Servicio corriendo.");
 
         } catch (Exception e) {
             logError("Error al iniciar servicio: ", e);
@@ -70,30 +67,4 @@ public class PrintServiceInit {
             e.printStackTrace(pw);
         } catch (IOException ignored) {}
     }
-
-    public void stop() {
-        try {
-            if (wsClient != null) wsClient.disconnect();
-            log("Servicio detenido.");
-        } catch (Exception e) {
-            logError("Error al detener servicio: ", e);
-        }
-    }
-
-    // Puedes eliminar este main si ya tienes uno externo
-    /*
-    public static void main(String[] args) {
-        boolean modoPrueba = false;
-        PrintServiceInit servicio = new PrintServiceInit(modoPrueba);
-        servicio.start();
-
-        synchronized (PrintServiceInit.class) {
-            try {
-                PrintServiceInit.class.wait();
-            } catch (InterruptedException e) {
-                servicio.logError("Hilo principal interrumpido: ", e);
-            }
-        }
-    }
-    */
 }

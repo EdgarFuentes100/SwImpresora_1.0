@@ -1,29 +1,27 @@
 package print;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class PrinterService {
 
-    private final Map<String, String> grupoImpresora;
-
     public PrinterService() {
-        grupoImpresora = new HashMap<>();
-        grupoImpresora.put("Cocina", "Impresora1");
-        grupoImpresora.put("Bar", "Impresora2");
+        // Constructor vacío está bien
     }
 
-    public void asignarImpresora(String grupo, String impresora) {
-        grupoImpresora.put(grupo, impresora);
-    }
+    // Método para imprimir el ticket usando impresora recibida o una de respaldo
+    public void imprimirTicket(String grupo, String impresora, String contenido) {
+        try {
+            if (impresora == null || impresora.isEmpty()) {
+                if ("grupo 1".equalsIgnoreCase(grupo)) {
+                    impresora = "Microsoft Print to PDF";
+                } else {
+                    impresora = "Microsoft XPS Document Writer";
+                }
+            }
 
-    public String getPrinterForGroup(String grupo) {
-        return grupoImpresora.get(grupo);
-    }
+            TicketPrinter printer = new TicketPrinter(impresora);
+            printer.printTicket(contenido);
 
-    public void imprimirTicket(String grupo, String contenido, boolean modoPrueba) {
-        String impresora = getPrinterForGroup(grupo);
-        TicketPrinter printer = new TicketPrinter(impresora, modoPrueba);
-        printer.printTicket(contenido);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

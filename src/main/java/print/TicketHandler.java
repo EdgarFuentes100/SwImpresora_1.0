@@ -1,40 +1,40 @@
 package print;
 
+import api.ApiClient;
+import api.model.Comanda;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 
 public class TicketHandler {
 
     private final PrinterService printerService;
+    private final ApiClient apiClient;
     private final ObjectMapper mapper;
 
-    public TicketHandler(PrinterService printerService) {
+    public TicketHandler(PrinterService printerService, ApiClient apiClient) {
         this.printerService = printerService;
+        this.apiClient = apiClient;
         this.mapper = new ObjectMapper();
     }
 
-    public void handleMessage(String message, boolean modoPrueba) {
+    public void handleMessage(String message) {
         try {
             Map<String, Object> data = mapper.readValue(message, Map.class);
 
-            String grupo = (String) data.getOrDefault("grupo", "SinGrupo");
+            String grupo = ((String) data.getOrDefault("grupo", "default")).toLowerCase();
             String numeroTicket = String.valueOf(data.getOrDefault("numeroTicket", "0"));
             String tipo = (String) data.getOrDefault("tipo", "Desconocido");
 
-            String contenido = "------ TICKET ------\n" +
-                    "Número: " + numeroTicket + "\n" +
-                    "Tipo: " + tipo + "\n" +
-                    "Grupo: " + grupo + "\n" +
-                    "-------------------\n";
+            String impresora = apiClient.getImpresora(grupo);
 
-            printerService.imprimirTicket(grupo, contenido, modoPrueba);
+            Comanda comanda = apiClient.getComandaObj(numeroTicket, tipo);
+
+            String contenido = comanda.formatearTicket();
+
+            printerService.imprimirTicket(grupo, impresora, contenido);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public void handleMessage(String message) {
-        handleMessage(message, false);
     }
 }

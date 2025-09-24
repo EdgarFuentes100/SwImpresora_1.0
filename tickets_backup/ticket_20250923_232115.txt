@@ -1,0 +1,10 @@
+------ TICKET ------
+Número: 1
+Mesa: MESA 2
+Cliente: null
+Mesero: null
+-------------------
+Mango x12
+FRUI x12
+-------------------
+Estado: Éxito

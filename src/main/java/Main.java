@@ -2,11 +2,9 @@ import print.PrintServiceInit;
 
 public class Main {
     public static void main(String[] args) {
-        boolean modoPrueba = false;
-        PrintServiceInit servicio = new PrintServiceInit(modoPrueba);
+        PrintServiceInit servicio = new PrintServiceInit();
         servicio.start();
 
-        // Mantener el servicio vivo indefinidamente
         synchronized (Main.class) {
             try {
                 Main.class.wait();
