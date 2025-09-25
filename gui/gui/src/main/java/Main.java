@@ -144,7 +144,12 @@ public class Main {
                 g.setImpresora(impresora);
 
                 try {
-                    service.actualizarGrupo(id, g);
+                    String respuesta = service.actualizarGrupo(id, g);
+                    if (respuesta.startsWith("Actualización exitosa")) {
+                        // Éxito
+                    } else {
+                        errores.add("Error al actualizar grupo " + id + ": " + respuesta);
+                    }
                 } catch (Exception ex) {
                     errores.add("Grupo " + id + ": " + ex.getMessage());
                 }
