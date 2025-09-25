@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ApiClient {
 
-    private final String baseUrl = "http://localhost:4000";
+    private final String baseUrl = "http://localhost:4000/api/v1";
     private final HttpClient client;
     private final ObjectMapper mapper;
 
@@ -22,6 +22,8 @@ public class ApiClient {
 
     // GET
     public String get(String endpoint) throws Exception {
+        String url = baseUrl + endpoint;
+        System.out.println("Llamando a: " + url);  // imprime la URL completa
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI(baseUrl + endpoint))
                 .GET()
