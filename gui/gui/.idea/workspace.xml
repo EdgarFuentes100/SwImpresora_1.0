@@ -5,11 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52b295aa-a3da-4cd2-994a-58bdc64849e0" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/model/grupoPrinterModel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/service/grupoPrinterService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/TestApiClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/model/GrupoPrinterResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/api/ApiClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/api/ApiClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/service/grupoPrinterService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/service/grupoPrinterService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
