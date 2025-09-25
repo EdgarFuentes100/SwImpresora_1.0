@@ -1,19 +1,17 @@
 package api.model;
 
-import java.util.List;
-
 public class ApiResponse {
     private boolean ok;
     private String message;
-    private List<Producto> datos;
+    private Comanda datos;
 
-    // getters y setters
+    // Getters y Setters
     public boolean isOk() { return ok; }
     public void setOk(boolean ok) { this.ok = ok; }
 
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
 
-    public List<Producto> getDatos() { return datos; }
-    public void setDatos(List<Producto> datos) { this.datos = datos; }
+    public Comanda getDatos() { return datos; }
+    public void setDatos(Comanda datos) { this.datos = datos; }
 }

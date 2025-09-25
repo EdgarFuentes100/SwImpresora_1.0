@@ -1,56 +1,98 @@
 package print;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import javax.print.*;
 
 public class TicketPrinter {
 
     private final String printerName;
 
-    // Constructor que solo recibe el nombre de la impresora
     public TicketPrinter(String printerName) {
         this.printerName = printerName;
     }
 
-    // Método para imprimir el ticket
-    public void printTicket(String contenido) {
+    public void printTicket(String contenidoTermal, String contenidoPlano) {
         try {
-            // Crear carpeta de respaldo si no existe
-            File backupFolder = new File("tickets_backup");
-            if (!backupFolder.exists()) backupFolder.mkdirs();
+            // Guardar el ticket plano
+            guardarTicketPlano(contenidoPlano);
 
-            // Crear el archivo de ticket con timestamp
-            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-            File file = new File(backupFolder, "ticket_" + timestamp + ".txt");
+            // Guardar la impresión cruda
+            guardarImpresionTermal(contenidoTermal);
 
-            try (FileWriter writer = new FileWriter(file)) {
-                writer.write(contenido);
-            }
+            // Imprimir directamente en la impresora
+            imprimirDirecto(contenidoTermal);
 
-            // Imprimir directamente
-            imprimirDirecto(file);
-
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // Método para imprimir directamente en la impresora especificada
-    private void imprimirDirecto(File file) throws IOException, InterruptedException {
-        String printerCommand;
+    private void guardarTicketPlano(String contenidoPlano) {
+        try {
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            File ticketsFolder = new File("tickets_backup");
+            if (!ticketsFolder.exists()) ticketsFolder.mkdirs();
 
-        // Si no hay nombre de impresora, usa una impresora predeterminada
-        if (printerName == null || printerName.isEmpty()) {
-            printerCommand = "cmd /c print /D:\"Microsoft Print to PDF\" \"" + file.getAbsolutePath() + "\"";
-        } else {
-            printerCommand = "cmd /c print /D:\"" + printerName + "\" \"" + file.getAbsolutePath() + "\"";
+            File ticketFile = new File(ticketsFolder, "ticket_plano_" + timestamp + ".txt");
+            try (FileWriter writer = new FileWriter(ticketFile, StandardCharsets.UTF_8)) {
+                writer.write(contenidoPlano);
+            }
+            System.out.println("Ticket plano guardado en: " + ticketFile.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
 
-        // Ejecutar el comando para imprimir
-        Process process = Runtime.getRuntime().exec(printerCommand);
-        process.waitFor();  // Esperar a que termine el proceso
+    private void guardarImpresionTermal(String contenidoTermal) {
+        try {
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            File impresionesFolder = new File("tickets_impresion");
+            if (!impresionesFolder.exists()) impresionesFolder.mkdirs();
+
+            File rawFile = new File(impresionesFolder, "impresion_termal_" + timestamp + ".bin");
+            try (FileOutputStream fos = new FileOutputStream(rawFile)) {
+                fos.write(contenidoTermal.getBytes(StandardCharsets.UTF_8));
+            }
+            System.out.println("Impresión termal guardada en: " + rawFile.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void imprimirDirecto(String contenidoTermal) {
+        try {
+            PrintService[] services = PrintServiceLookup.lookupPrintServices(null, null);
+            PrintService selectedPrinter = null;
+
+            for (PrintService service : services) {
+                if (printerName != null && printerName.equalsIgnoreCase(service.getName())) {
+                    selectedPrinter = service;
+                    break;
+                }
+            }
+
+            if (selectedPrinter == null) {
+                System.out.println("No se encontró la impresora '" + printerName + "'. Usando impresora por defecto.");
+                selectedPrinter = PrintServiceLookup.lookupDefaultPrintService();
+            }
+
+            if (selectedPrinter == null) {
+                System.err.println("No hay impresora disponible.");
+                return;
+            }
+
+            DocPrintJob job = selectedPrinter.createPrintJob();
+            byte[] bytes = contenidoTermal.getBytes(StandardCharsets.UTF_8);
+            Doc doc = new SimpleDoc(bytes, DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
+            job.print(doc, null);
+
+            System.out.println("Ticket termal enviado a la impresora: " + selectedPrinter.getName());
+
+        } catch (PrintException e) {
+            e.printStackTrace();
+        }
     }
 }

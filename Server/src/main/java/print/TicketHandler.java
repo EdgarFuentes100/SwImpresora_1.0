@@ -26,12 +26,11 @@ public class TicketHandler {
             String tipo = (String) data.getOrDefault("tipo", "Desconocido");
 
             String impresora = apiClient.getImpresora(grupo);
-
             Comanda comanda = apiClient.getComandaObj(numeroTicket, tipo);
+            String contenido = comanda.formatearTicketTermico();
+            String contenido2 = comanda.formatearTicket();
 
-            String contenido = comanda.formatearTicket();
-
-            printerService.imprimirTicket(grupo, impresora, contenido);
+            printerService.imprimirTicket(impresora, contenido, contenido2);
 
         } catch (Exception e) {
             e.printStackTrace();

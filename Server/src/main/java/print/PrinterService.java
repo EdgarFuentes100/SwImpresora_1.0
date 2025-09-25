@@ -3,22 +3,19 @@ package print;
 public class PrinterService {
 
     public PrinterService() {
-        // Constructor vacío está bien
+        // Constructor vacío
     }
 
-    // Método para imprimir el ticket usando impresora recibida o una de respaldo
-    public void imprimirTicket(String grupo, String impresora, String contenido) {
+    public void imprimirTicket(String impresora, String contenido, String contenidoPlano) {
         try {
             if (impresora == null || impresora.isEmpty()) {
-                if ("grupo 1".equalsIgnoreCase(grupo)) {
-                    impresora = "Microsoft Print to PDF";
-                } else {
-                    impresora = "Microsoft XPS Document Writer";
-                }
+                // Si no se pasa impresora, usa la predeterminada del sistema
+                System.out.println("No se especificó impresora, usando la predeterminada.");
+                impresora = null;
             }
 
             TicketPrinter printer = new TicketPrinter(impresora);
-            printer.printTicket(contenido);
+            printer.printTicket(contenido, contenidoPlano);
 
         } catch (Exception e) {
             e.printStackTrace();
